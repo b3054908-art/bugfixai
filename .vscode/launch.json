@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Backend: FastAPI (Uvicorn)",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${workspaceFolder}/backend/.venv/bin/python",
+      "module": "uvicorn",
+      "cwd": "${workspaceFolder}/backend",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/backend/.env",
+      "args": [
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "4000",
+        "--reload"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/backend"
+      }
+    },
+    {
+      "name": "Frontend: Vite App",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "cd ${workspaceFolder}/frontend && npm run dev -- --host 0.0.0.0 --port 3000 --strictPort",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/frontend"
+    },
+    {
+      "name": "Docker: Postgres + Redis",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "cd ${workspaceFolder}/backend && docker compose up postgres redis",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/backend"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "BugFixAI: Full Stack",
+      "configurations": [
+        "Docker: Postgres + Redis",
+        "Backend: FastAPI (Uvicorn)",
+        "Frontend: Vite App"
+      ],
+      "stopAll": true
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+# --- One-time / after pulling new files: full stack up ---
+cd backend
+docker compose up -d
+
+cd ../frontend
+npm install
+npm run dev
+
+# --- Force-recreate api (use when docker-compose.yml itself changed, e.g. env vars) ---
+cd backend
+docker compose up -d --force-recreate api
+
+# --- Individual pieces ---
+cd backend
+docker compose up -d postgres redis        # just DB + cache
+docker compose exec api alembic upgrade head   # manual migration run
+docker compose logs -f api                 # tail backend logs
+docker compose ps                          # see what's running
+
+# --- Stop everything ---
+cd backend
+docker compose down
+
+cd backend
+docker compose restart api
+
+cd ../frontend
+npm run dev
+
+celery 
+
+cd backend && celery -A app.workers.celery_app worker --loglevel=info
+
+stop command 
+
+docker compose stop redis postgres
+
+docker compose kill redis postgres
+
+alambic 
+
+cd /workspaces/BUG-fixer.ai/backend
+source .venv/bin/activate
+alembic upgrade head

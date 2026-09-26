@@ -1,0 +1,14 @@
+storage/
+sandbox-work/
+
+.venv/
+__pycache__/
+*.pyc
+
+.git/
+.gitignore
+.vscode/
+
+.env
+.env.*
+!.env.example
