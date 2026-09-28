@@ -3,6 +3,8 @@ import {
   Check,
   ChevronRight,
   Loader2,
+  Maximize2,
+  Minimize2,
   Send,
   Sparkles,
   X,
@@ -29,11 +31,14 @@ interface AgentPanelProps {
   onFileWritten?: (path: string) => void;
   /** Called when the user clicks the panel's own minimize arrow. */
   onCollapse?: () => void;
+  maximized?: boolean;
+  onMaximize?: () => void;
+  onRestore?: () => void;
 }
 
 type ProposalUiStatus = 'idle' | 'applying' | 'applied' | 'rejected' | 'error';
 
-export const AgentPanel: React.FC<AgentPanelProps> = ({ projectId, activeModel, activePath, initialPrompt, onFileWritten, onCollapse }) => {
+export const AgentPanel: React.FC<AgentPanelProps> = ({ projectId, activeModel, activePath, initialPrompt, onFileWritten, onCollapse, maximized = false, onMaximize, onRestore }) => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<CopilotMessage[]>([]);
   const [input, setInput] = useState('');
@@ -151,7 +156,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ projectId, activeModel, 
   };
 
   return (
-    <div className="w-80 shrink-0 bg-[#181818] border-l border-[#2D2D2D] flex flex-col h-full text-[#CCCCCC]">
+    <div className={`${maximized ? 'fixed inset-0 z-[100] h-screen w-screen' : 'w-80 h-full border-l'} shrink-0 bg-[#181818] border-[#2D2D2D] flex flex-col text-[#CCCCCC]`}>
       <div className="h-9 px-3 flex items-center justify-between border-b border-[#2D2D2D] shrink-0">
         <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[#CCCCCC]">
           <Sparkles className="w-3.5 h-3.5 text-[#9CDCFE]" />
@@ -159,11 +164,23 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ projectId, activeModel, 
         </div>
               <div className="flex items-center gap-2">
           <span className="text-[10px] text-[#6A6A6A] font-mono">{activeModel}</span>
+          {(onMaximize || onRestore) && (
+            <button
+              type="button"
+              onClick={maximized ? onRestore : onMaximize}
+              className="text-[#858585] hover:text-white p-0.5"
+              title={maximized ? 'Restore Agent panel' : 'Maximize Agent panel'}
+              aria-label={maximized ? 'Restore Agent panel' : 'Maximize Agent panel'}
+            >
+              {maximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            </button>
+          )}
           {onCollapse && (
             <button
               onClick={onCollapse}
               className="text-[#858585] hover:text-white p-0.5"
-              title="Minimize Agent panel"
+              title="Hide Agent panel"
+              aria-label="Hide Agent panel"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>

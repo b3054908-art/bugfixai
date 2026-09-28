@@ -1,6 +1,7 @@
 """Mirrors: backend/src/common/middleware/auth.middleware.ts"""
 from fastapi import Depends, Header
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.errors.app_error import AppError
@@ -26,8 +27,14 @@ async def _get_or_create_dev_user(db: AsyncSession) -> User:
     if user is None:
         user = User(email=DEV_USER_EMAIL, passwordHash="", displayName="Dev User")
         db.add(user)
-        await db.commit()
-        await db.refresh(user)
+        try:
+            await db.commit()
+            await db.refresh(user)
+        except IntegrityError:
+            await db.rollback()
+            user = (await db.execute(select(User).where(User.email == DEV_USER_EMAIL))).scalar_one_or_none()
+            if user is None:
+                raise
     return user
 
 

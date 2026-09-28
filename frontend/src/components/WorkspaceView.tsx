@@ -330,6 +330,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
     const raw = window.localStorage.getItem('bugfixer-agent-panel-open');
     return raw === null ? true : raw === 'true';
   });
+  const [agentPanelMaximized, setAgentPanelMaximized] = useState(false);
   const [bottomPanelOpen, setBottomPanelOpen] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true;
     const raw = window.localStorage.getItem('bugfixer-bottom-panel-open');
@@ -340,6 +341,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
     const raw = window.localStorage.getItem('bugfixer-bottom-tab');
     return raw === 'problems' || raw === 'output' || raw === 'terminal' || raw === 'debug_console' ? raw : 'problems';
   });
+  const ACTIVITY_BAR_WIDTH = 44;
   const MIN_EXPLORER_WIDTH = 180;
   const MAX_EXPLORER_WIDTH = 420;
   const MIN_BOTTOM_PANEL_HEIGHT = 120;
@@ -1692,7 +1694,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
       const rect = workbenchRef.current.getBoundingClientRect();
 
       if (isResizingExplorer) {
-        const nextWidth = Math.min(MAX_EXPLORER_WIDTH, Math.max(MIN_EXPLORER_WIDTH, event.clientX - rect.left));
+        const nextWidth = Math.min(MAX_EXPLORER_WIDTH, Math.max(MIN_EXPLORER_WIDTH, event.clientX - rect.left - ACTIVITY_BAR_WIDTH));
         setExplorerWidth(nextWidth);
       }
 
@@ -2046,14 +2048,6 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
         {/* SIDEBAR: EXPLORER / SEARCH / GIT / EXTENSIONS */}
         {activityView === 'explorer' && (
           <>
-            <div
-              className="w-1.5 bg-[#1E1E1E] hover:bg-[#007ACC] cursor-col-resize border-r border-[#191919] shrink-0"
-              onPointerDown={(event) => {
-                event.preventDefault();
-                setIsResizingExplorer(true);
-              }}
-              title="Drag to resize Explorer"
-            />
             <div className="bg-[#252526] border-r border-[#191919] flex flex-col shrink-0 text-xs text-[#CCCCCC]" style={{ width: `${explorerWidth}px` }}>
           <div className="px-3 py-2.5 flex items-center justify-between text-[11px] font-bold tracking-wider uppercase text-[#BBBBBB] border-b border-[#333333]">
             <span>Explorer</span>
@@ -2281,6 +2275,14 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
             {renderTree(tree)}
           </div>
         </div>
+        <div
+          className="w-1.5 bg-[#1E1E1E] hover:bg-[#007ACC] cursor-col-resize border-r border-[#191919] shrink-0"
+          onPointerDown={(event) => {
+            event.preventDefault();
+            setIsResizingExplorer(true);
+          }}
+          title="Drag to resize Explorer"
+        />
       </>
     )}
 
@@ -3049,7 +3051,13 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({
             activeModel={activeModel}
             activePath={activeFile?.path ?? null}
             initialPrompt={agentQuickPrompt}
-            onCollapse={() => setAgentPanelOpen(false)}
+            maximized={agentPanelMaximized}
+            onMaximize={() => setAgentPanelMaximized(true)}
+            onRestore={() => setAgentPanelMaximized(false)}
+            onCollapse={() => {
+              setAgentPanelMaximized(false);
+              setAgentPanelOpen(false);
+            }}
             onFileWritten={(path) => {
               setOpenFiles(prev => prev.map(f => (f.path === path ? { ...f } : f)));
               void loadTree();
